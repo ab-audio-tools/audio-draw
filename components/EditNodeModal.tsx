@@ -43,10 +43,10 @@ export default function EditNodeModal({ nodeName, ports, onSave, onClose }: Edit
   const outputPorts = editedPorts.filter((p) => p.direction === 'output');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-3xl max-h-[80vh] overflow-y-auto rounded-lg bg-white shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-lg bg-white shadow-xl flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
+        <div className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 flex-shrink-0">
           <h2 className="text-xl font-semibold text-gray-900">Edit Node: {nodeName}</h2>
           <button
             onClick={onClose}
@@ -56,8 +56,8 @@ export default function EditNodeModal({ nodeName, ports, onSave, onClose }: Edit
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
+        {/* Content - scrollable */}
+        <div className="flex-1 overflow-y-auto p-6">{/* Input Ports */}
           {/* Input Ports */}
           <div className="mb-6">
             <div className="mb-3 flex items-center justify-between">
@@ -121,8 +121,8 @@ export default function EditNodeModal({ nodeName, ports, onSave, onClose }: Edit
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="sticky bottom-0 flex justify-end gap-3 border-t border-gray-200 bg-white px-6 py-4">
+        {/* Footer - fixed at bottom */}
+        <div className="flex justify-end gap-3 border-t border-gray-200 bg-white px-6 py-4 flex-shrink-0">
           <button
             onClick={onClose}
             className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -155,29 +155,29 @@ function PortEditor({ port, onChange, onDelete }: PortEditorProps) {
   const connectorType = port.connectorType || getDefaultConnectorType(port.signalType);
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+    <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-2">
       {/* Connector Preview */}
       <div
-        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
+        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
         style={{ backgroundColor: 'white', border: `2px solid ${color}` }}
       >
-        <ConnectorIcon type={connectorType} size={18} color={color} />
+        <ConnectorIcon type={connectorType} size={16} color={color} />
       </div>
 
-      {/* Port Name */}
+      {/* Port Name - wider */}
       <input
         type="text"
         value={port.name}
         onChange={(e) => onChange({ name: e.target.value })}
-        className="flex-1 rounded border border-gray-300 px-3 py-1.5 text-sm"
+        className="flex-1 min-w-[120px] rounded border border-gray-300 px-2 py-1 text-sm"
         placeholder="Port name"
       />
 
-      {/* Signal Type */}
+      {/* Signal Type - compact */}
       <select
         value={port.signalType}
         onChange={(e) => onChange({ signalType: e.target.value as SignalType })}
-        className="rounded border border-gray-300 px-3 py-1.5 text-sm"
+        className="rounded border border-gray-300 px-2 py-1 text-xs w-28"
       >
         <option value="line">Line</option>
         <option value="mic">Mic</option>
@@ -188,11 +188,11 @@ function PortEditor({ port, onChange, onDelete }: PortEditorProps) {
         <option value="power">Power</option>
       </select>
 
-      {/* Connector Type */}
+      {/* Connector Type - compact */}
       <select
         value={connectorType}
         onChange={(e) => onChange({ connectorType: e.target.value as ConnectorType })}
-        className="rounded border border-gray-300 px-3 py-1.5 text-sm"
+        className="rounded border border-gray-300 px-2 py-1 text-xs w-32"
       >
         <option value="xlr">XLR</option>
         <option value="jack-ts">Jack TS</option>
@@ -209,7 +209,7 @@ function PortEditor({ port, onChange, onDelete }: PortEditorProps) {
       {/* Delete Button */}
       <button
         onClick={onDelete}
-        className="flex-shrink-0 rounded p-2 text-red-600 hover:bg-red-50"
+        className="flex-shrink-0 rounded p-1.5 text-red-600 hover:bg-red-50"
         title="Delete port"
       >
         <Trash2 className="h-4 w-4" />

@@ -221,10 +221,11 @@ function DeviceNode({ id, data, selected }: NodeProps<DeviceNodeData>) {
 
   const handleToggleLock = useCallback(() => {
     if (id) {
+      const newLockState = !data.isLocked;
       setTimeout(() => {
         updateNode(id, { 
-          data: { ...data, isLocked: !data.isLocked },
-          draggable: data.isLocked, // if currently locked, make draggable
+          data: { ...data, isLocked: newLockState },
+          draggable: !newLockState, // when locked, not draggable
         });
         saveToHistory();
       }, 0);
