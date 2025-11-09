@@ -47,6 +47,10 @@ function DeviceNode({ id, data, selected }: NodeProps<DeviceNodeData>) {
   const addNode = useEditorStore((s) => s.addNode);
   const nodes = useEditorStore((s) => s.nodes);
 
+  // Use ref to track current data without causing re-renders in callbacks
+  const dataRef = useRef(data);
+  dataRef.current = data;
+
   // label position state (local while dragging), persisted to node.data.labelOffset
   const initialOffset = data.labelOffset ?? { x: 128, y: 0 };
   const [labelOffset, setLabelOffset] = useState<{ x: number; y: number }>(initialOffset);
@@ -107,15 +111,19 @@ function DeviceNode({ id, data, selected }: NodeProps<DeviceNodeData>) {
     draggingRef.current = false;
     startRef.current = null;
     pointerDownClientRef.current = null;
-    // persist to node data
-    if (id) {
+    // persist to node data - capture current values to avoid closure issues
+    const nodeId = id;
+    const currentOffset = labelOffset;
+    if (nodeId) {
       // defer update to avoid synchronous nested store updates causing React update loops
       setTimeout(() => {
-        updateNode(id, { data: { ...data, labelOffset } });
+        updateNode(nodeId, { 
+          data: { ...dataRef.current, labelOffset: currentOffset } 
+        });
         saveToHistory();
       }, 0);
     }
-  }, [data, id, labelOffset, updateNode, saveToHistory]);
+  }, [id, labelOffset, updateNode, saveToHistory]);
 
   useEffect(() => {
     // global listeners while dragging
@@ -220,26 +228,31 @@ function DeviceNode({ id, data, selected }: NodeProps<DeviceNodeData>) {
   }, [copiedNodeData, id, nodes, addNode, saveToHistory]);
 
   const handleToggleLock = useCallback(() => {
-    if (id) {
-      const newLockState = !data.isLocked;
+    const nodeId = id;
+    if (nodeId) {
       setTimeout(() => {
-        updateNode(id, { 
-          data: { ...data, isLocked: newLockState },
+        const currentData = dataRef.current;
+        const newLockState = !currentData.isLocked;
+        updateNode(nodeId, { 
+          data: { ...currentData, isLocked: newLockState },
           draggable: !newLockState, // when locked, not draggable
         });
         saveToHistory();
       }, 0);
     }
-  }, [id, data, updateNode, saveToHistory]);
+  }, [id, updateNode, saveToHistory]);
 
   const handleSavePorts = useCallback((ports: DevicePort[]) => {
-    if (id) {
+    const nodeId = id;
+    if (nodeId) {
       setTimeout(() => {
-        updateNode(id, { data: { ...data, ports } });
+        updateNode(nodeId, { 
+          data: { ...dataRef.current, ports } 
+        });
         saveToHistory();
       }, 0);
     }
-  }, [id, data, updateNode, saveToHistory]);
+  }, [id, updateNode, saveToHistory]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -331,9 +344,15 @@ function DeviceNode({ id, data, selected }: NodeProps<DeviceNodeData>) {
                 onChange={(ev) => setEditValue(ev.target.value)}
                 onBlur={() => {
                   setIsEditing(false);
+                  const newName = editValue;
+                  const nodeId = id;
                   setTimeout(() => {
-                    if (id) updateNode(id, { data: { ...data, deviceName: editValue } });
-                    saveToHistory();
+                    if (nodeId) {
+                      updateNode(nodeId, { 
+                        data: { ...dataRef.current, deviceName: newName } 
+                      });
+                      saveToHistory();
+                    }
                   }, 0);
                 }}
                 onKeyDown={(ev) => {
@@ -405,18 +424,19 @@ function DeviceNode({ id, data, selected }: NodeProps<DeviceNodeData>) {
         document.body
       )}
 
-      {/* Edit Node Modal */}
-      {showEditModal && (
+      {/* Edit Node Modal - rendered via portal to avoid transform issues */}
+      {showEditModal && typeof window !== 'undefined' && ReactDOM.createPortal(
         <EditNodeModal
           nodeName={data.deviceName}
           ports={data.ports}
           onSave={handleSavePorts}
           onClose={() => setShowEditModal(false)}
-        />
+        />,
+        document.body
       )}
 
-      {/* Confirm Delete Dialog */}
-      {confirmDelete && (
+      {/* Confirm Delete Dialog - rendered via portal to avoid transform issues */}
+      {confirmDelete && typeof window !== 'undefined' && ReactDOM.createPortal(
         <ConfirmDialog
           title="Delete Node"
           message={`Are you sure you want to delete "${data.deviceName}"? This will also remove all connected cables.`}
@@ -425,7 +445,8 @@ function DeviceNode({ id, data, selected }: NodeProps<DeviceNodeData>) {
           danger={true}
           onConfirm={confirmDeleteNode}
           onCancel={() => setConfirmDelete(false)}
-        />
+        />,
+        document.body
       )}
     </motion.div>
   );

@@ -285,6 +285,83 @@ const seedDevices = [
       },
     }),
   },
+  {
+    name: 'Behringer X32',
+    slug: 'behringer-x32',
+    imageUrl: '/devices/mixer-x32.svg',
+    schemaJson: JSON.stringify({
+      ports: [
+        // 32 Mic/Line Inputs (XLR)
+        ...Array.from({ length: 32 }, (_, i) => ({
+          id: `mic-in-${i + 1}`,
+          name: `Mic/Line ${i + 1}`,
+          direction: 'input',
+          signalType: 'audio-mono',
+          connectorType: 'xlr',
+        })),
+        // 16 XLR Outputs
+        ...Array.from({ length: 16 }, (_, i) => ({
+          id: `xlr-out-${i + 1}`,
+          name: `XLR Out ${i + 1}`,
+          direction: 'output',
+          signalType: 'audio-mono',
+          connectorType: 'xlr',
+        })),
+        // 6 Aux Send (jack TRS)
+        ...Array.from({ length: 6 }, (_, i) => ({
+          id: `aux-send-${i + 1}`,
+          name: `Aux Send ${i + 1}`,
+          direction: 'output',
+          signalType: 'audio-mono',
+          connectorType: 'jack-trs',
+        })),
+        // Main L/R Out (XLR)
+        {
+          id: 'main-out-l',
+          name: 'Main Out L',
+          direction: 'output',
+          signalType: 'audio-mono',
+          connectorType: 'xlr',
+        },
+        {
+          id: 'main-out-r',
+          name: 'Main Out R',
+          direction: 'output',
+          signalType: 'audio-mono',
+          connectorType: 'xlr',
+        },
+        // AES50 A & B (Ethernet - digital audio networking)
+        {
+          id: 'aes50-a',
+          name: 'AES50 A',
+          direction: 'output',
+          signalType: 'dante',
+          connectorType: 'ethernet',
+        },
+        {
+          id: 'aes50-b',
+          name: 'AES50 B',
+          direction: 'output',
+          signalType: 'dante',
+          connectorType: 'ethernet',
+        },
+        // USB Audio
+        {
+          id: 'usb-audio',
+          name: 'USB Audio',
+          direction: 'output',
+          signalType: 'digital-audio',
+          connectorType: 'usb',
+        },
+      ],
+      meta: {
+        manufacturer: 'Behringer',
+        model: 'X32',
+        category: 'Digital Mixer',
+        description: '40-input, 25-bus digital mixing console',
+      },
+    }),
+  },
 ];
 
 async function main() {
